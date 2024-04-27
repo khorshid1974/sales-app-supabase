@@ -48,7 +48,7 @@
         
         <slot />
         <div class="flex justify-end pt-3 space-x-2">
-          <button  type="button"  class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <button  type="button" @click="isOpen=false" class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             Cancel
           </button>
           <button @click="addRole" type="button"  class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -72,7 +72,7 @@
   const add = ref(false);
   const edit = ref(false);
   const del = ref(false);
-
+  const emit = defineEmits(['close'])
   const { data: entities, error } =await supabase.from('Entity').select('*');
   if (error) {
     console.error('error', error.message);
@@ -92,6 +92,9 @@ const addRole= async()=>{
         console.error('error', error.message);
       } else {
         console.log('data', data);
+        //$emit('close');
+        //isOpen=false;
+        emit('close')
       }
 }
   </script>

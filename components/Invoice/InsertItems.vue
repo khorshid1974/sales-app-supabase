@@ -10,12 +10,13 @@
           </button>
         </div>
         <slot />
-        <div class="flex justify-end pt-3 space-x-2">
-          <button @click="$emit('close')" type="button"  class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Cancel
+        
+        <div  class="flex justify-end pt-3 space-x-2">
+          <button v-show="showHideSecondButton"  @click="$emit('close')" type="button"  class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Cancel {{ showHideSecondButton }}
           </button>
           <button type="button" @click="$emit('insert')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Insert
+            {{ actionButton }}
           </button>
         </div>
       </div>
@@ -23,11 +24,27 @@
   </template>
   
   <script setup>
+  const someCondition= ref(false);
   const props = defineProps({
     isOpen: Boolean,
+    actionButton: {
+      type:String,
+      default: 'Insert'
+    },
+    secondButtonVisibility: {
+      type:Boolean,
+      default: true
+    }
+      
   });
   
- 
+ const showHideSecondButton = computed(() => {
+    return props.secondButtonVisibility==true ? true : false;
+  });
+  
+  // const emitClose = () => {
+  //   $emit('close');
+  // };
 //   const emitInsert = () => {
 //     $emit('insert');
 //   };

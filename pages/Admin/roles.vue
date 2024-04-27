@@ -1,26 +1,41 @@
 <template>
     <div>
         <!-- {{ uniqueRoles }} -->
-        <h1>Roles</h1>
-        <RolesAddRoleToUserRoles :isOpen="isOpen" @close="isOpen = false" :roleId="role_id" ></RolesAddRoleToUserRoles>
+        <div class="flex flex-row justify-between align-middle"> 
+            <h1>Roles</h1>
+            <InvoiceToast v-show="showToast">Saved Sucsesfuly</InvoiceToast>
+        <button @click="openNewRole = true"  class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Add Role
+        </button></div>
+       
+        <RolesNew :is-open="openNewRole" @close="openNewRole = false" @inserted="refreshRoles" ></RolesNew>
+        <RolesAddRoleToUserRoles :isOpen="isOpen" @close="isOpen = false" :roleId="role_id"  ></RolesAddRoleToUserRoles>
     <!-- {{ roles }} -->
     <div class="grid grid-cols-1 gap-1 mr-2 md:grid-cols-2 md:gap-2 md:mr-6 lg:grid-cols-3 lg:gap-3 ">
         <div v-for="role in uniqueRoles" :key="role.id" class="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700 m-5">
             <div class="flex items-center justify-between mb-4">
                 <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white"><span class=" font-normal">Role:</span> {{ role.roleName }}</h5>
-                    <button @click="openDailouge(role.roleId)" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <div class="">
+                    <button @click="openDailouge(role.roleId)" class="px-2 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         Add
                     </button>
+                    <button @click="deleteTheRole(role.roleId)"  class="px-2 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        delete
+                    </button>
+                </div>
+                  
                 
         </div>
         <div  class="flow-root">
                 <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                   
                     <li v-for="entity in role.entities" :key="entity.id" class="py-3 sm:py-4">
                         <div class="flex items-center">
                             <!-- <div class="flex-shrink-0">
                                 <img class="w-8 h-8 rounded-full" src="/profile-picture-3.jpg" alt="Neil image">
                             </div> -->
-                            <div class="flex-1 min-w-0 ms-4">
+                           
+                            <div v-show="entity.urId" class="flex-1 min-w-0 ms-4">
                                 <div class="flex flex-row justify-between">
                                     <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
                                     {{ entity.re }} -  {{ entity.en }}
@@ -39,7 +54,7 @@
                                 <p class="text-sm text-gray-500 truncate dark:text-gray-400">
                                         
 
-                                    <ul class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <ul  class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                         <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
                                             <div class="flex items-center ps-3">
                                                 <input v-model="entity.read" id="vue-checkbox-list" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
@@ -74,7 +89,7 @@
                         </div>
                     </li>
                    
-                    <li class="pt-3 pb-0 sm:pt-4">
+                    <!-- <li class="pt-3 pb-0 sm:pt-4">
                         <div class="flex items-center ">
                             <div class="flex-shrink-0">
                                 <img class="w-8 h-8 rounded-full" src="/profile-picture-3.jpg" alt="Thomas image">
@@ -91,7 +106,7 @@
                                 $2367
                             </div>
                         </div>
-                    </li>
+                    </li> -->
                 </ul>
         </div>
         </div>
@@ -105,22 +120,49 @@
 <script setup>
     const supabase = useSupabaseClient();
     const isOpen = ref(false);
+    const openNewRole = ref(false);
     const role_id= ref(0);
+    const color = useColor() ;
+    const showToast = ref(false);
+    console.log(color.value, 'color');
+    color.value = 'red';
+    console.log(color.value, 'new color');
+    const uniqueRoles= ref([]);
+    onMounted(() => {
+        // Code to run after the component is mounted
+        uniqueRoles.value = roles.reduce((acc, role) => {
+        const existingRole = acc.find(u => u.roleId === role.role_id);
+        //console.log('role id');
+        //console.log(role.role_id);
+        if (existingRole) {
+            existingRole.entities.push({en:role.entity_name, re:role.entity_id, read:role.read, add:role.add, edit:role.edit, delete:role.delete, urId: role.ur_id}); // Add new user object to existing user object
+        } else {
+            acc.push({ roleId: role.role_id, roleName: role.role_name, entities: [{en:role.entity_name, re:role.entity_id, read:role.read, add:role.add, edit:role.edit, delete:role.delete, urId: role.ur_id}] }); // Create new user object
+        }
+        return acc;
+        }, []);
+        
+        });
     const {data:roles, error} = await supabase.from('roles_with_entities').select('*');
-    if (error) {
-        console.log(error);
-    } else {
-        console.log(roles);
-    }
-    const openDailouge = (roleId) => {
-        isOpen.value = true;
-        console.log(roleId), 'role id';
-        role_id.value = roleId;
-    }
-    const uniqueRoles = roles.reduce((acc, role) => {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log(roles);
+           // allRoles.value = roles;
+        }
+    const refreshRoles = async () => {
+        console.log('refreshRoles');
+        const {data, error} = await supabase.from('roles_with_entities').select('*');
+        if (error) {
+            console.log(error);
+        } else {
+            console.log(data);
+           // allRoles.value = roles;
+        }
+        uniqueRoles.value = data.reduce((acc, role) => {
     const existingRole = acc.find(u => u.roleId === role.role_id);
-    console.log('role id');
-    console.log(role.role_id);
+    //console.log('role id');
+    //console.log(role.role_id);
     if (existingRole) {
         existingRole.entities.push({en:role.entity_name, re:role.entity_id, read:role.read, add:role.add, edit:role.edit, delete:role.delete, urId: role.ur_id}); // Add new user object to existing user object
     } else {
@@ -128,8 +170,17 @@
     }
     return acc;
     }, []);
-    console.log('uniqueRoles');
-    console.log(uniqueRoles);
+        //console.log(uniqueRoles, 'uniqueRoles');
+        
+    }
+    const openDailouge = (roleId) => {
+        isOpen.value = true;
+        //console.log(roleId), 'role id';
+        role_id.value = roleId;
+    }
+ 
+    // console.log('uniqueRoles');
+    // console.log(uniqueRoles);
     const saveUr = async (entity) => {
         console.log(entity);
         const {data, error} = await supabase.from('UserRoles').update({
@@ -139,6 +190,10 @@
             console.log(error);
         } else {
             console.log(data);
+            showToast.value = true;
+            setTimeout(() => {
+                showToast.value = false;
+            }, 3000);
         }
     }
     const deleteRole = async (re) => {
@@ -148,6 +203,30 @@
             console.log(error);
         } else {
             console.log(data);
+        }
+    }
+    const deleteTheRole = async (roleId) => {
+        //console.log(roleId);
+        const index = roles.findIndex(role => role.role_id === roleId);
+        //console.log(index);
+       roles.splice(index, 1);
+        uniqueRoles.value = roles.reduce((acc, role) => {
+            const existingRole = acc.find(u => u.roleId === role.role_id);
+            //console.log('role id');
+            //console.log(role.role_id);
+            if (existingRole) {
+                existingRole.entities.push({en:role.entity_name, re:role.entity_id, read:role.read, add:role.add, edit:role.edit, delete:role.delete, urId: role.ur_id}); // Add new user object to existing user object
+            } else {
+                acc.push({ roleId: role.role_id, roleName: role.role_name, entities: [{en:role.entity_name, re:role.entity_id, read:role.read, add:role.add, edit:role.edit, delete:role.delete, urId: role.ur_id}] }); // Create new user object
+            }
+            return acc;
+        }, []);
+
+        const {error} = await supabase.from('Role').delete().eq('id', roleId);
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Role deleted');
         }
     }
 </script>

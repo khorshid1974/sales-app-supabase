@@ -1,5 +1,5 @@
 <template>
-    <div class="grid grid-cols-5 gap-4">
+    <div v-if="invoice_read" class="grid grid-cols-5 gap-4">
         <div class=" flex flex-col space-y-1">
            <!-- date filter section -->
         <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">Date Filter {{ firstDay }}</h3>
@@ -146,6 +146,7 @@
             </li>
         </ul>
         </div>
+       
         <!-- Results in table format -->
         <div class=" col-span-4 rounded-md bg-gray-200 dark:bg-zinc-800 mt-6">
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 my-2 ">
@@ -164,11 +165,14 @@
                 <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
                  v-for="invoice in filterdInvoices" :key="invoice.id">
                     <td class="px-6 py-4">
-                        <nuxt-link to='Invoices/${invoice.id}' > {{ invoice.id }}</nuxt-link>
+                        <!-- <nuxt-link to='Invoices/${invoice.id}' > {{ invoice.id }}</nuxt-link> -->
+                        {{ invoice.id }}
                        
                     </td>
                     <td class="px-6 py-4">
-                        <nuxt-link :to="{ name: 'Invoices-id', params: { id: invoice.id }}"> {{ invoice.Code }}</nuxt-link>
+                       
+                        <span v-if="!invoice_edit" > {{ invoice.Code }}</span>
+                        <nuxt-link v-else :to="{ name: 'Invoices-id', params: { id: invoice.id }}"> {{ invoice.Code }}</nuxt-link>
                        
                     </td>
                     <td class="px-6 py-4">{{ convertStringToDate(invoice.created_at) }}</td>
@@ -197,8 +201,12 @@
 </template>
 
 <script setup>
-import dayjs from 'dayjs';
-const paid = ref(false);
+    import dayjs from 'dayjs';
+    const { getRole } = useAdminUtliltes();
+    const invoice_read = getRole('Invoice', 'read');
+    // const invoice_add = getRole('Invoices', 'add') ;
+    const invoice_edit = getRole('Invoice', 'edit') ;
+    const paid = ref(false);
     const  getMonthStartEnd= (date)=> {
         const year = date.getFullYear();
         const month = date.getMonth();

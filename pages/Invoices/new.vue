@@ -1,5 +1,5 @@
 <template>
-    <div class="m-4 p-4">
+    <div v-if="invoice_add" class="m-4 p-4">
       <InvoiceToast v-show="saveSuccessed"> Invoice added succesfully </InvoiceToast> 
       <div class="flex flex-row justify-between items-center border p-1">  
         <input class="p-2 m-2"  v-on:keyup.enter="searchItems" type="text" v-model="searchQuery" placeholder="Search...">
@@ -141,6 +141,9 @@
        <hr/>
       <button class="p-3 m-2 text-l  rounded-lg border-x-black bg-zinc-300" type="button" @click="saveInvoice">Save</button>
     </div>
+    <div v-else class="flex items-center justify-center m-4 font-mono p-6 border border-red-200 rounded-md">
+        <p class=" text-xl text-red-500">  don't have permission to add</p>
+    </div>
 </template>
 
 <script setup>
@@ -156,6 +159,8 @@ const selectedCustomer = ref(0);
 const saveSuccessed = ref(false);
 const filterEmptyItems = ref(false);
 const paymentType = ref(1);
+const { getRole } = useAdminUtliltes();
+const invoice_add = getRole('Invoice', 'add');
 const { generateProductCode } = useUtliltes();
 const readCustomers = async () => {
   if (showCutomer.value && customers.value.length == 0) {
@@ -190,11 +195,20 @@ const insert= () => {
 const saveInvoice = async () => {
   //console.log((await supabase.auth.getUser()).data.user.id);
   const userId= (await supabase.auth.getUser()).data.user.id;
+  const {data:user, error: userError} = await supabase.from('User').select().eq('UserId', userId).single();
+  if (userError) {
+    console.error(userError);
+   
+  } else {
+    console.log(user, 'user');
+  }
+  const currentUser= useUser('user');
+  console.log(currentUser.value, 'currentUser');
   const invoice = {
     Code: generateProductCode(),
     CustomerId: selectedCustomer.value==0?null:selectedCustomer.value,
     UserId2: userId,
-    UserId: 1,
+    UserId: user.id,
     Payment: payment.value,
     PaymentTypeId:  parseInt(paymentType.value),
     PaymentDate: payment.value== sum.value?new Date():null,

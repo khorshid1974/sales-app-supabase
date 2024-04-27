@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="invoice_edit">
         <!-- <h1>Invoice {{ route.params.id }}</h1> -->
         
         <div  class="flex flex-row justify-around border-b-2 border-t-2 py-2 mt-2">
@@ -60,6 +60,9 @@
        
       <button class=" noprint p-3 m-2 text-xl text-yellow-200 rounded-lg border-x-black bg-zinc-500" type="button" @click="saveInvoice">Save</button>
     </div>
+    <div v-else class="flex items-center justify-center m-4 font-mono p-6 border border-red-200 rounded-md">
+        <p class=" text-xl text-red-500">  don't have permission to edit</p>
+    </div>
 </template>
 
 <script setup>
@@ -72,7 +75,8 @@ const quantity = ref(0);
 const oldQuantity = ref(0);
 const currentitem = ref(Object);
 const itemStock= ref(0);
-
+const {getRole} = useAdminUtliltes();
+const invoice_edit = getRole('Invoice', 'edit');
 
 onMounted(async () => {
     console.log('mounted');

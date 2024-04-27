@@ -1,12 +1,15 @@
 <template>
     <div>
         <h1>Customers</h1>
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 my-2 ">
+        <table v-if="role" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 my-2 ">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         
                 <tr>
                     <th scope="col" class="px-6 py-3">id</th>
                     <th scope="col" class="px-6 py-3">name</th>
+                    <th scope="col" class="px-6 py-3">Total Purchaces</th>
+                    <th scope="col" class="px-6 py-3">Total Payments</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
                 
                 </tr>
             </thead>
@@ -18,6 +21,12 @@
                         <nuxt-link :to="{ name: 'Customers-new-id', params: { id: customer.id }}"> {{ customer.Name }}</nuxt-link>
                        
                     </td>
+                    <td class="px-6 py-4">{{ customer.salespaument }}</td>
+                    <td class="px-6 py-4">{{ customer.payment }}</td>
+                    <td class="px-6 py-4 cursor-pointer" >
+                        <nuxt-link :to="{ name: 'Customers-slug', params: { slug: customer.id }}">  <Icon name="arcticons:super-status-bar"  size="2em" color="green" /></nuxt-link>
+                       
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -26,12 +35,16 @@
 
 <script setup>
 const customers_data = ref([])
+const {getRole} = useAdminUtliltes();
 const supabase = useSupabaseClient()
-const { data, error } = await supabase.from('Customer').select('*')
+const { data, error } = await supabase.from('customer_with_payments').select('*')
     if (error) {
         throw new Error(error.message)
     }
+    console.log(data, 'data');
     customers_data.value = data;
+    const role = getRole('Customers', 'read');
+    console.log(role, 'role');
     //return data
 
 </script>

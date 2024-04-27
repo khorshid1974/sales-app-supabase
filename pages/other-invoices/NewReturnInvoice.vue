@@ -1,5 +1,5 @@
 <template>
-    <div class="m-4 p-4">
+    <div v-if="invoice_add" class="m-4 p-4">
       <InvoiceToast v-show="saveSuccessed"> Invoice added succesfully </InvoiceToast> 
       <div class="flex flex-row justify-between items-center">  
         <input class="p-2 m-2"  v-on:keyup.enter="searchItems" type="text" v-model="searchQuery" placeholder="Search...">
@@ -121,6 +121,9 @@
        
       <button class="p-3 m-2 text-xl text-yellow-200 rounded-lg border-x-black bg-zinc-500" type="button" @click="saveInvoice">Save</button>
     </div>
+    <div v-else class="flex items-center justify-center m-4 font-mono p-6 border border-red-200 rounded-md">
+        <p class=" text-xl text-red-500">  don't have permission to edit</p>
+    </div>
 </template>
 
 <script setup>
@@ -135,7 +138,8 @@ const customers = ref([]);
 const selectedCustomer = ref(0);
 const saveSuccessed = ref(false);
 const filterEmptyItems = ref(false);
-
+const { getRole} = getRouteRules();
+const invoice_add = getRole('Invoice', 'add');
 const { generateProductCode } = useUtliltes();
 const readCustomers = async () => {
   if (showCutomer.value && customers.value.length == 0) {
